@@ -18,14 +18,19 @@ class DataFlowAnalysisService {
 	public function calculateBalanceCoefficient() {
 		$weights 		= $this->dataFlowAnalysisDAO->getWeights();
 		$centralities 	= $this->dataFlowAnalysisDAO->getCentralities();
+		$elements 		= $this->dataFlowAnalysisDAO->getElements();
 
-		$weightedCentralities = array();
+		if (count($elements) > 0) {
+			$weightedCentralities = array();
 
-		for ($i = 0; $i < count($centralities); $i++) {
-			$weightedCentralities[$i] = $weights[$i] * $centralities[$i];
+			for ($i = 0; $i < count($centralities); $i++) {
+				$weightedCentralities[$i] = $weights[$i] * $centralities[$i];
+			}
+
+			$this->balanceCoefficient = round(abs(array_sum($weightedCentralities) / count($weightedCentralities) - max($weightedCentralities)), 2);
+		} else {
+			$this->balanceCoefficient = 0;
 		}
-
-		$this->balanceCoefficient = round(abs(array_sum($weightedCentralities) / count($weightedCentralities) - max($weightedCentralities)), 2);
 	}
 
 	public function calculateCentralityCoefficient() {
@@ -45,18 +50,28 @@ class DataFlowAnalysisService {
 	public function calculateDensity() {
 		$centralities 		= $this->dataFlowAnalysisDAO->getCentralities();
 		$dataFlowsAmount 	= $this->dataFlowAnalysisDAO->getDataFlowsAmount();
+		$elements 			= $this->dataFlowAnalysisDAO->getElements();
 
-		$size = count($centralities);
-		$this->density = $dataFlowsAmount / ($size * ($size - 1));
+		if (count($elements) > 0) {
+			$size = count($centralities);
+			$this->density = $dataFlowsAmount / ($size * ($size - 1));
+		} else {
+			$this->density = 0;
+		}
 	}
 
 	public function calculateNormalizedCentralities() {
-		$centralities = $this->dataFlowAnalysisDAO->getCentralities();
+		$centralities 	= $this->dataFlowAnalysisDAO->getCentralities();
+		$elements 		= $this->dataFlowAnalysisDAO->getElements();
 
-		$size = count($centralities);
+		if (count($elements) > 0) {
+			$size = count($centralities);
 
-		for ($i = 0; $i < count($centralities); $i++) {
-			$this->normalizedCentralities[$i] = -round($centralities[$i] / ($size - 1), 2);
+			for ($i = 0; $i < count($centralities); $i++) {
+				$this->normalizedCentralities[$i] = -round($centralities[$i] / ($size - 1), 2);
+			}
+		} else {
+			$this->normalizedCentralities = array();
 		}
 	}
 
